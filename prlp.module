@@ -106,7 +106,14 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
         // Let the user's password be changed without the current password check.
         $token = drupal_hash_base64(drupal_random_bytes(55));
         $_SESSION['pass_reset_' . $user->uid] = $token;
-        drupal_goto('user/' . $user->uid . '/edit', array('query' => array('pass-reset-token' => $token)));
+        $dest = variable_get('prlp_destination');
+        if(empty($dest)) {
+          drupal_goto('user/' . $user->uid . '/edit', array('query' => array('pass-reset-token' => $token)));
+        } else {
+          // replace '%uid' token with uid of the current user
+          $dest = str_replace('%uid', $user->uid, $dest);
+          drupal_goto($dest);
+        }
       }
       else {
         drupal_set_message(t('You have tried to use a one-time login link that has either been used or is no longer valid. Please request a new one using the form below.'));
