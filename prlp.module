@@ -8,15 +8,24 @@ function prlp_form_user_pass_reset_alter(&$form, &$form_state) {
   @list($uid, $timestamp, $hashed_pass, $action) = $form_state['build_info']['args'];
   if($uid) {
     $form['#user'] = user_load($uid);
-    // Do this only
+    // Do this only if the URI didn't have an 'action' component
     if(empty($action)) {
       // Inject the username/password change form into the current form.
       user_account_form($form, $form_state);
       // ???
       $form['#user_category'] = 'account';
-      // Hide email and picture fields.
-      $form['account']['mail']['#access'] = FALSE;
-      $form['picture']['#access'] = FALSE;
+      // Hide certain fields in $form
+      foreach($form as $key => &$element) {
+        if(in_array($key, prlp_get_hidden_fields())) {
+          $element['#access'] = FALSE;
+        }
+      }
+      // Hide certain fields in $form['account']
+      foreach($form['account'] as $key => &$element) {
+        if(in_array($key, prlp_get_hidden_account_fields())) {
+          $element['#access'] = FALSE;
+        }
+      }
       // Unset $form['#action'] so that the form doesn't get submitted to the
       // user profile edit page. Instead it gets submitted to self.
       unset($form['#action']);
@@ -107,4 +116,27 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
       drupal_access_denied();
     }
   }
+}
+
+define('PRLP_DEFAULT_HIDDEN_FIELDS', "signature_settings\npicture");
+
+function prlp_get_hidden_fields() {
+  $fields = &drupal_static(__FUNCTION__);
+  if(!isset($fields)) {
+    // break the variable value by newline separator
+    $fields = explode("\n", variable_get('prlp_hidden_fields', PRLP_DEFAULT_HIDDEN_FIELDS));
+  }
+  return $fields;
+}
+
+
+define('PRLP_DEFAULT_HIDDEN_ACCOUNT_FIELDS', "mail");
+
+function prlp_get_hidden_account_fields() {
+  $fields = &drupal_static(__FUNCTION__);
+  if(!isset($fields)) {
+    // break the variable value by newline separator
+    $fields = explode("\n", variable_get('prlp_hidden_account_fields', PRLP_DEFAULT_HIDDEN_ACCOUNT_FIELDS));
+  }
+  return $fields;
 }
