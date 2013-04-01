@@ -1,4 +1,5 @@
 name=Password Reset Landing Page (PRLP)
 description=Enhances the password reset landing page by letting user change their password there (and potentially username and email address).
 core=7.x
+package = Administration
 configure = admin/config/people/accounts/prlp
