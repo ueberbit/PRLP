@@ -91,7 +91,7 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
         drupal_set_message(t('The one-time login link you clicked is invalid.'));
       }
     }
-    drupal_goto();
+    $form_state['redirect'] = '';
   }
   else {
     // Time out, in seconds, until login URL expires. Defaults to 24 hours =
@@ -107,7 +107,7 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
       // No time out for first time login.
       if ($account->login && $current - $timestamp > $timeout) {
         drupal_set_message(t('You have tried to use a one-time login link that has expired. Please request a new one using the form below.'));
-        drupal_goto('user/password');
+        $form_state['redirect'] = 'user/password';
       }
       elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
         /*
@@ -136,16 +136,16 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
         $_SESSION['pass_reset_' . $user->uid] = $token;
         $dest = variable_get('prlp_destination', PRLP_DESTINATION_DEFAULT);
         if(empty($dest) || $dest == PRLP_DESTINATION_DEFAULT) {
-          drupal_goto('user/' . $user->uid . '/edit', array('query' => array('pass-reset-token' => $token)));
+          $form_state['redirect'] = array('user/' . $user->uid . '/edit', array('query' => array('pass-reset-token' => $token)));
         } else {
           // replace '%uid' token with uid of the current user
           $dest = str_replace('%uid', $user->uid, $dest);
-          drupal_goto($dest);
+          $form_state['redirect'] = $dest;
         }
       }
       else {
         drupal_set_message(t('You have tried to use a one-time login link that has either been used or is no longer valid. Please request a new one using the form below.'));
-        drupal_goto('user/password');
+        $form_state['redirect'] = 'user/password';
       }
     }
     else {
