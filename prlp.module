@@ -66,7 +66,7 @@ define('PRLP_DESTINATION_DEFAULT', 'user/%uid/edit');
 /**
  * This function is almost a direct copy of 'user_pass_reset' function, with a
  * couple of significant changes. It saves the password or username changes.
- * 
+ *
  * Also, Unlike that function, this one is a form submit handler.
  */
 function prlp_user_pass_reset_submit($form, &$form_state) {
@@ -125,7 +125,8 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
         // First stage is a confirmation form, then login
         watchdog('user', 'User %name used one-time login link at time %timestamp.', array('%name' => $account->name, '%timestamp' => $timestamp));
         // Set the new user.
-        $user = $account;
+        // Reload the user instead of using $account because the plain text password is in $account->pass at this point.
+        $user = user_load($account->uid);
         // user_login_finalize() also updates the login timestamp of the
         // user, which invalidates further use of the one-time login link.
         user_login_finalize();
@@ -134,13 +135,14 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
         // Let the user's password be changed without the current password check.
         $token = drupal_hash_base64(drupal_random_bytes(55));
         $_SESSION['pass_reset_' . $user->uid] = $token;
-        $dest = variable_get('prlp_destination', PRLP_DESTINATION_DEFAULT);
-        if(empty($dest) || $dest == PRLP_DESTINATION_DEFAULT) {
+        // If necessary, replace '%uid' token with uid of the current user.
+        $destination = variable_get('prlp_destination', PRLP_DESTINATION_DEFAULT);
+        if (empty($destination) || $destination == PRLP_DESTINATION_DEFAULT) {
           $form_state['redirect'] = array('user/' . $user->uid . '/edit', array('query' => array('pass-reset-token' => $token)));
-        } else {
-          // replace '%uid' token with uid of the current user
-          $dest = str_replace('%uid', $user->uid, $dest);
-          $form_state['redirect'] = $dest;
+        }
+        else {
+          $destination = str_replace('%uid', $user->uid, $destination);
+          $form_state['redirect'] = $destination;
         }
       }
       else {
