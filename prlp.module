@@ -155,7 +155,7 @@ function prlp_user_pass_reset_submit($form, &$form_state) {
         }
         else {
           $destination = str_replace('%uid', $user->uid, $destination);
-          // handle URL parameters in destination
+          // Handle URL parameters in destination.
           $destination = drupal_parse_url($destination);
           $form_state['redirect'] = array($destination['path'], $destination);
         }
