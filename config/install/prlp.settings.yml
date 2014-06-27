@@ -1,0 +1,5 @@
+password_required: true
+destination: 'user/%uid/edit'
+hidden_fields: "signature_settings\nuser_picture\nlanguage"
+hidden_account_fields: 'mail'
+langcode: en

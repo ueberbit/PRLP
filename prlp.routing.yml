@@ -1,0 +1,7 @@
+prlp.settings:
+  path: 'admin/config/people/accounts/prlp'
+  defaults:
+    _form: '\Drupal\prlp\Form\PrlpSettingsForm'
+    _title: 'PRLP settings'
+  requirements:
+    _permission: 'access administration pages'
